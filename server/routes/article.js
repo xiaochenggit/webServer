@@ -23,7 +23,7 @@ router.post('/images', multipart(), (req, res, next) => {
             //复制文件流
             fs.createReadStream(item.path).pipe(fs.createWriteStream(targetPath));
             //响应ajax请求，告诉它图片传到哪了
-            data.push('http://localhost:80/articleImages/' + filename)
+            data.push('/articleImages/' + filename)
         });
         res.json({ errno: 0, data: data });
     } else {
@@ -36,7 +36,7 @@ router.post('/images', multipart(), (req, res, next) => {
         //复制文件流
         fs.createReadStream(dataImage.path).pipe(fs.createWriteStream(targetPath));
         //响应ajax请求，告诉它图片传到哪了
-        res.json({ errno: 0, data: ['http://localhost:80/articleImages/' + filename ] });
+        res.json({ errno: 0, data: ['/articleImages/' + filename ] });
     }
 })
 
@@ -166,6 +166,8 @@ router.post('/detail', (req, res, next) => {
 		Article.findOne({ _id })
 		.populate({ path: 'author', select: 'userName sex avatar' })
 		.populate({ path: 'categories.category', select: 'name _id' })
+		.populate({ path: 'browses.user', select: 'userName sex avatar' })
+		.populate({ path: 'likes.user', select: 'userName sex avatar' })
 		.exec((err, article) => {
 			if (err) {
 				res.json({ status: 401,msg: err.message });
@@ -174,14 +176,23 @@ router.post('/detail', (req, res, next) => {
 					let cookieUser = req.session.user;
 					if (cookieUser) { // 判断是否浏览过
 						article.browses.forEach((item, index) => {
-								if (item.user == cookieUser._id) {
+								if (item.user._id == cookieUser._id) {
 									article.browses.splice(index, 1);
 									return;
 								}
 						})
 						article.browses.unshift({ user: cookieUser._id, time: new Date().getTime() });
 						article.save((err, article) => {
-								res.json({ status: 200,msg: '获取文章信息成功!',result: { article } })
+							article.populate({ 
+								path: 'browses.user',
+								select: 'userName sex avatar'
+							}, (err,article) => {
+								res.json({
+									status: 200,
+									msg: '获取文章信息成功!',
+									result: { article }
+								})
+							})
 						})
 					} else {
 						res.json({ status: 200,msg: '获取文章信息成功!',result: { article } })

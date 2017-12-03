@@ -197,7 +197,10 @@ router.post('/changeinfo', (req, res, next) => {
 // 获得用户详情
 router.post('/detail', (req, res, next) => {
   let _id = req.body.userId;
-  User.findById({ _id }, (err, user) => {
+  User.findById({ _id })
+  .populate({path: 'follows.user', select: 'userName sex avatar'})
+  .populate({path: 'cares.user', select: 'userName sex avatar'})
+  .exec((err, user) => {
     if (err) {
       res.json({
         status: 401,
@@ -361,36 +364,4 @@ router.post('/care', (req, res, next) => {
     });
   }
 });
-
-// 获得用户的关注（被关注）
-router.post('/getcare', (req, res, next) => {
-  let _id = req.body._id;
-  User.findOne({_id})
-  .populate({path: 'follows.user', select: 'userName sex avatar' })
-  .populate({path: 'cares.user', select: 'userName sex avatar' })
-  .exec((err, user) => {
-    if (err) {
-      res.json({
-        status: 401,
-        msg: err.message
-      })
-    } else {
-      if (user) {
-        res.json({
-          status: 200,
-          msg: '获得用户关注信息成功!',
-          result: {
-            follows: user.follows,
-            cares: user.cares
-          }
-        })
-      } else {
-        res.json({
-          status: 201,
-          msg: '没找到用户信息!'
-        })
-      }
-    }
-  })
-})
 module.exports = router;
