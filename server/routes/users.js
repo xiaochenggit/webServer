@@ -72,10 +72,11 @@ router.get('/cheklogin', (req, res, next) => {
           })
         })
       } else {
+        req.session.user = "";
         res.json({
           status: 201,
           msg: '未登录!'
-        })
+        });
       }
     })
   } else {

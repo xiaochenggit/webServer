@@ -62,6 +62,39 @@ let userSchema = new Schema({
             type: Number,
             default: new Date().getTime()
         }
+    }],
+    // 创建的项目
+    createProjects: [{
+        project: {
+            type : ObjectId,
+            ref : 'Project'
+        },
+        time: {
+            type: Number,
+            default: new Date().getTime()
+        }
+    }],
+    // 收藏的项目
+    careProjects: [{
+        project: {
+            type : ObjectId,
+            ref : 'Project'
+        },
+        time: {
+            type: Number,
+            default: new Date().getTime()
+        }
+    }],
+    // 承接的项目
+    holdProjects: [{
+        project: {
+            type : ObjectId,
+            ref : 'Project'
+        },
+        time: {
+            type: Number,
+            default: new Date().getTime()
+        }
     }]
 });
 
